@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  opencode:
+    build: .
+    ports:
+      - "4096:4096"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./workspace:/workspace
+    working_dir: /workspace
+
+

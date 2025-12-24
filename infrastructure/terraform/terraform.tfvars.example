@@ -1,0 +1,9 @@
+aws_region         = "us-east-1"
+project_name       = "opencode-agent"
+environment        = "production"
+enable_https       = false
+certificate_arn    = ""
+anthropic_api_key  = ""
+openai_api_key     = ""
+
+

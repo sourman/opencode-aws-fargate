@@ -1,0 +1,79 @@
+{
+  "family": "opencode-agent",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "opencode-container",
+      "image": "ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/opencode-agent:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 4096,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "WORKSPACE_DIR",
+          "value": "/mnt/efs/workspace"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "ANTHROPIC_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:opencode-llm-keys:ANTHROPIC_API_KEY::"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:opencode-llm-keys:OPENAI_API_KEY::"
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "efs-storage",
+          "containerPath": "/mnt/efs",
+          "readOnly": false
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/opencode-agent",
+          "awslogs-region": "REGION",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:4096/ || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ],
+  "volumes": [
+    {
+      "name": "efs-storage",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "EFS_FILE_SYSTEM_ID",
+        "rootDirectory": "/",
+        "transitEncryption": "ENABLED",
+        "authorizationConfig": {
+          "accessPointId": "EFS_ACCESS_POINT_ID",
+          "iam": "ENABLED"
+        }
+      }
+    }
+  ]
+}
+
+
