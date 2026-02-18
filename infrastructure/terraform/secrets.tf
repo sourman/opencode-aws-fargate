@@ -5,6 +5,10 @@ resource "aws_secretsmanager_secret" "llm_keys" {
   tags = merge(local.common_tags, {
     Name = "${var.project_name}-llm-keys"
   })
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
 resource "aws_secretsmanager_secret_version" "llm_keys" {

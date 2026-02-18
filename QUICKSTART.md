@@ -59,11 +59,10 @@ This will:
 
 ## Step 3: Access OpenCode
 
-Get the load balancer URL:
+Get the task's public IP:
 
 ```bash
-cd infrastructure/terraform
-terraform output alb_dns_name
+./scripts/get-task-ip.sh
 ```
 
 Or use the Makefile:
@@ -72,7 +71,7 @@ Or use the Makefile:
 make status
 ```
 
-Open the URL in your browser - you should see the OpenCode web UI!
+Open the URL (http://<public-ip>:4096) in your browser - you should see the OpenCode web UI!
 
 ## Common Commands
 
@@ -117,9 +116,10 @@ aws ecs list-tasks \
 
 ### Can't access the URL
 
-1. Check security groups allow traffic from your IP
-2. Verify the ALB target group health checks are passing
+1. Check security groups allow traffic on port 4096 (should allow 0.0.0.0/0)
+2. Verify the ECS task is running and has a public IP
 3. Check CloudWatch logs for errors
+4. Ensure the task's security group allows inbound traffic on port 4096
 
 ### EFS mount issues
 

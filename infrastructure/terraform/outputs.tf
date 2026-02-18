@@ -1,6 +1,6 @@
-output "alb_dns_name" {
-  description = "DNS name of the load balancer"
-  value       = aws_lb.opencode.dns_name
+output "dns_name" {
+  description = "DNS name for accessing OpenCode"
+  value       = try(aws_route53_record.agent.fqdn, "Not configured")
 }
 
 output "ecr_repository_url" {

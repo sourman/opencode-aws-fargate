@@ -42,4 +42,11 @@ variable "openai_api_key" {
   sensitive   = true
 }
 
+variable "create_hosted_zone" {
+  description = "Create Route53 hosted zone if it doesn't exist"
+  type        = bool
+  default     = false
+}
+
+
 

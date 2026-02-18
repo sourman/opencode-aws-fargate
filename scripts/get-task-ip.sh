@@ -1,0 +1,55 @@
+#!/bin/bash
+set -e
+
+CLUSTER_NAME=${CLUSTER_NAME:-opencode-agent-cluster}
+SERVICE_NAME=${SERVICE_NAME:-opencode-agent-service}
+AWS_REGION=${AWS_REGION:-us-east-1}
+
+echo "Getting task IP for service: $SERVICE_NAME"
+
+TASK_ARN=$(aws ecs list-tasks \
+  --cluster "$CLUSTER_NAME" \
+  --service-name "$SERVICE_NAME" \
+  --region "$AWS_REGION" \
+  --query 'taskArns[0]' \
+  --output text)
+
+if [ -z "$TASK_ARN" ] || [ "$TASK_ARN" == "None" ]; then
+  echo "No running tasks found. Service may still be starting..."
+  exit 1
+fi
+
+echo "Task ARN: $TASK_ARN"
+echo "Getting network interface..."
+
+NETWORK_INTERFACE_ID=$(aws ecs describe-tasks \
+  --cluster "$CLUSTER_NAME" \
+  --tasks "$TASK_ARN" \
+  --region "$AWS_REGION" \
+  --query 'tasks[0].attachments[0].details[?name==`networkInterfaceId`].value' \
+  --output text)
+
+if [ -z "$NETWORK_INTERFACE_ID" ] || [ "$NETWORK_INTERFACE_ID" == "None" ]; then
+  echo "Could not find network interface"
+  exit 1
+fi
+
+PUBLIC_IP=$(aws ec2 describe-network-interfaces \
+  --network-interface-ids "$NETWORK_INTERFACE_ID" \
+  --region "$AWS_REGION" \
+  --query 'NetworkInterfaces[0].Association.PublicIp' \
+  --output text)
+
+if [ -z "$PUBLIC_IP" ] || [ "$PUBLIC_IP" == "None" ]; then
+  echo "Could not find public IP"
+  exit 1
+fi
+
+echo ""
+echo "=== OpenCode Access ==="
+echo "Public IP: $PUBLIC_IP"
+echo "URL: http://$PUBLIC_IP:4096"
+echo ""
+echo "Open this URL in your browser to access OpenCode!"
+
+

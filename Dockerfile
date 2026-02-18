@@ -13,5 +13,4 @@ WORKDIR /mnt/efs/workspace
 
 EXPOSE 4096
 
-CMD ["opencode", "serve", "--port", "4096", "--hostname", "0.0.0.0", "--directory", "/mnt/efs/workspace"]
-
+CMD ["opencode", "serve", "--port", "4096", "--hostname", "0.0.0.0"]

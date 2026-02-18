@@ -14,6 +14,8 @@ help:
 	@echo "  set-secrets  - Set API keys in Secrets Manager"
 	@echo "  logs         - Tail ECS container logs"
 	@echo "  status       - Show deployment status"
+	@echo "  open         - Open OpenCode in browser"
+	@echo "  update-dns   - Manually update DNS record"
 
 build:
 	./scripts/build-and-push.sh
@@ -47,7 +49,16 @@ status:
 		--query 'services[0].{Status:status,Running:runningCount,Desired:desiredCount,Deployments:deployments[*].{Status:status,TaskDef:taskDefinition}}' \
 		--output table || echo "Service not found"
 	@echo ""
-	@echo "=== Load Balancer DNS ==="
-	@cd infrastructure/terraform && terraform output -raw alb_dns_name 2>/dev/null || echo "Not deployed yet"
+	@echo "=== DNS Information ==="
+	@cd infrastructure/terraform && terraform output -raw dns_name 2>/dev/null | xargs -I {} echo "DNS Name: {}" || echo "DNS not configured"
+	@echo ""
+	@echo "=== Getting Task Public IP ==="
+	@./scripts/get-task-ip.sh 2>/dev/null || echo "No running tasks yet"
+
+update-dns:
+	./scripts/update-dns.sh
+
+open:
+	./scripts/open-opencode.sh
 
 

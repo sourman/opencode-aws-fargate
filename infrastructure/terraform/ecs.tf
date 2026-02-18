@@ -129,6 +129,17 @@ resource "aws_ecs_task_definition" "opencode" {
 
       environment = []
 
+      command = [
+        "opencode",
+        "serve",
+        "--port",
+        "4096",
+        "--hostname",
+        "0.0.0.0"
+      ]
+
+      workingDirectory = "/mnt/efs/workspace"
+
       secrets = [
         {
           name      = "ANTHROPIC_API_KEY"
@@ -198,17 +209,7 @@ resource "aws_ecs_service" "opencode" {
     assign_public_ip = true
   }
 
-  load_balancer {
-    target_group_arn = aws_lb_target_group.opencode.arn
-    container_name   = "opencode-container"
-    container_port   = 4096
-  }
-
   enable_execute_command = true
-
-  depends_on = [
-    aws_lb_listener.opencode
-  ]
 
   tags = local.common_tags
 }

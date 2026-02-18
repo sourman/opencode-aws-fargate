@@ -4,12 +4,13 @@ This project deploys the OpenCode agent on AWS Fargate with persistent storage, 
 
 ## Architecture
 
-- **ECS Fargate**: Runs OpenCode containers
+- **ECS Fargate**: Runs OpenCode containers with public IPs
 - **EFS (Elastic File System)**: Persistent storage for workspace and session data
-- **Application Load Balancer**: Routes traffic to containers with sticky sessions
 - **Secrets Manager**: Stores LLM API keys (shared across all users)
 - **DynamoDB**: Optional session metadata tracking
 - **ECR**: Container image registry
+
+**Note**: This setup uses direct access via ECS task public IPs (no load balancer) for simplicity.
 
 ## Prerequisites
 
@@ -41,16 +42,29 @@ This will:
 - Build and push the Docker image to ECR
 - Deploy the ECS service
 
-### 3. Access OpenCode
+### 3. Configure DNS (One-time setup)
 
-After deployment, get the load balancer URL:
+Update your domain registrar with Route53 name servers. See `DNS_SETUP.md` for detailed instructions.
+
+**Name servers** (get current values with `terraform output name_servers`):
+- ns-1328.awsdns-38.org
+- ns-1931.awsdns-49.co.uk
+- ns-257.awsdns-32.com
+- ns-899.awsdns-48.net
+
+### 4. Access OpenCode
+
+Once DNS is configured and tasks are running, access OpenCode at:
+
+**URL**: `http://agent.compliancy-csm.xyz:4096`
+
+The DNS record automatically updates when tasks start/stop. You can also manually update it:
 
 ```bash
-cd infrastructure/terraform
-terraform output alb_dns_name
+make update-dns
+# or
+./scripts/update-dns.sh
 ```
-
-Open the URL in your browser to access the OpenCode web UI.
 
 ## Manual Deployment Steps
 

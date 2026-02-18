@@ -8,12 +8,9 @@ This document describes the AWS infrastructure architecture for running OpenCode
 Internet
    │
    ▼
-Application Load Balancer (ALB)
-   │
-   ├─ Sticky Sessions (Cookie-based)
-   │
-   ▼
 ECS Fargate Tasks (OpenCode Containers)
+   │
+   ├─ Public IP (Direct Access)
    │
    ├─ Port 4096 (OpenCode Server)
    │
@@ -50,13 +47,12 @@ ECS Fargate Tasks (OpenCode Containers)
 - **Mount Point**: `/mnt/efs/workspace` in containers
 - **Lifecycle**: Transitions to Infrequent Access after 30 days
 
-### 4. Load Balancing (ALB)
+### 4. Direct Access
 
-- **Type**: Application Load Balancer
-- **Port**: 80 (HTTP), 443 (HTTPS optional)
-- **Target Group**: Routes to ECS tasks on port 4096
-- **Sticky Sessions**: Enabled (24-hour cookie duration)
-- **Health Checks**: HTTP GET on `/` every 30 seconds
+- **Access Method**: Direct access via ECS task public IP
+- **Port**: 4096 (OpenCode server)
+- **Security**: Security group allows inbound traffic on port 4096 from internet
+- **Note**: No load balancer - simplified architecture for internal/limited use
 
 ### 5. Security
 
